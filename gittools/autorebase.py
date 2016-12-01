@@ -11,7 +11,7 @@ Goals:
 import sys
 from subprocess import check_output, check_call, CalledProcessError
 
-from .gitcmd import update_branch, diverged_from, broader_than
+from gitcmd import update_branch, diverged_from, broader_than
 
 
 def shouldnot_rebase_branch(branch_name):
