@@ -1,45 +1,51 @@
 #!/usr/bin/python
 
+"""
+This module aims to automatically rebase unmerged branch onto target branch.
+Goals:
+        Nicer commit tree
+        Save your time
+
+"""
+
+import sys
 from subprocess import check_output, check_call, CalledProcessError
 
-print check_output(['git checkout master && git pull'], shell=True)
+from .gitcmd import update_branch, diverged_from, broader_than
 
 
-diverged = check_output(['git branch --no-merged master'], shell=True).split()
+def shouldnot_rebase_branch(branch_name):
+    return 'norebase' in branch_name
 
 
-# List branches and removes star on current one
+def main(branch='master', update_target=True):
+    if update_target:
+        update_branch(branch)
+    diverged = diverged_from(branch=branch)
 
-diverged = set([s for s in [s.strip(' *\n') for s in diverged ] if s])
+    broader = broader_than(branch=branch)
 
-print diverged
+    to_rebase = diverged - broader
 
-broader = check_output(['git branch --contains master'],
-                        shell=True).split()
+    print 'branches to be rebased: ', ' ,'.join(to_rebase)
 
-broader = set([s for s in [s.strip(' *\n') for s in broader ] if s])
+    failed = []
+    sys.stdout.flush()
+    for branch_name in to_rebase:
+        if shouldnot_rebase_branch(branch_name):
+            continue
+        try:
+            out = check_output(['git rebase master %s' % branch], shell=True)
+            print out
+            print ''
+        except CalledProcessError:
+            check_call(['git rebase --abort'], shell=True)
+            print 'please fix'
+            failed.append(branch)
+            break
 
-print broader
+    print 'failed ', failed if failed else None
 
-to_rebase = diverged - broader
 
-print 'branches to be rebased: ', ' ,'.join(to_rebase)
-
-failed = []
-import sys
-sys.stdout.flush()
-for branch in to_rebase:
-    if 'bckup' in branch:
-        continue
-    try:
-        out = check_output(['git rebase master %s' % branch], shell=True)
-        print out
-        print ''
-    except CalledProcessError :
-        check_call(['git rebase --abort'],shell=True)
-        print 'please fix'
-        failed.append(branch)
-        break
-
-print 'failed ', failed if failed else None
-
+if __name__ == '__main__':
+    main()
