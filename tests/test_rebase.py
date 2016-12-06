@@ -45,7 +45,6 @@ class DefaultTestCase(TestCase):
 
     def test_base(self):
         os.chdir(self.repodir)
-        import pdb
         statements = ['git init ',
                       'git checkout -b targebranch',
                       'touch file1',
