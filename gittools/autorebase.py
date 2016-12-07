@@ -9,42 +9,40 @@ Goals:
 """
 
 import sys
-from subprocess import check_output, check_call, CalledProcessError
+from subprocess import check_call, CalledProcessError
 
-from gitcmd import update_branch, diverged_from, broader_than
+from gitcmd import update_branch, unmerged,  broader_than
 
 
 def shouldnot_rebase_branch(branch_name):
     return 'norebase' in branch_name
 
 
-def main(branch='master', update_target=True):
+def main(target='master', update_target=True):
     if update_target:
-        update_branch(branch)
-    diverged = diverged_from(branch=branch)
+        update_branch(target)
+    diverged = unmerged(branch=target)
 
-    broader = broader_than(branch=branch)
+    broader = broader_than(branch=target)
 
     to_rebase = diverged - broader
 
     print 'branches to be rebased: ', ' ,'.join(to_rebase)
 
-    failed = []
+    failed, success = [], []
     sys.stdout.flush()
-    for branch_name in to_rebase:
-        if shouldnot_rebase_branch(branch_name):
+    for branch in to_rebase:
+        if shouldnot_rebase_branch(branch):
             continue
         try:
-            out = check_output(['git rebase master %s' % branch], shell=True)
-            print out
-            print ''
+            check_call(['git rebase %s %s' % (target, branch)],
+                       shell=True)
+            success.append(branch)
         except CalledProcessError:
             check_call(['git rebase --abort'], shell=True)
-            print 'please fix'
             failed.append(branch)
-            break
 
-    print 'failed ', failed if failed else None
+    return {'failed': failed, 'succeeded': success}
 
 
 if __name__ == '__main__':
