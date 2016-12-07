@@ -32,7 +32,6 @@ def one(iterable):
     return content[0]
 
 def rand(N=4):
-    return '0000'
     return str(randint(0, 10**N)).zfill(N)
 
 
