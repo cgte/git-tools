@@ -19,9 +19,9 @@ from os.path import splitext, abspath, dirname, join
 import os
 
 from gittools import gitcmd
+from gittools import autorebase
 
 directory = abspath(dirname(__file__))
-
 
 devnull = open(os.devnull, 'w')
 
@@ -73,11 +73,18 @@ class DefaultTestCase(TestCase):
 
         self.assertEqual(gitcmd.unmerged(target), set(['broader', 'branch_to_rebase']))
 
-        self.assertEqual(one(gitcmd.unmerged(target) - gitcmd.broader_than(target)), 'branch_to_rebase')
+        branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
+
+        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
+
+        rebase_result = autorebase.main(target=target, update_target=False)
+
+        self.assertEqual(rebase_result['failed'], [])
+        self.assertEqual(rebase_result['succeeded'], ['branch_to_rebase'])
+
+        self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
 
     def tearDown(self):
-        from time import sleep
-        sleep(2)
         check_call('rm -rf %s' %  self.repodir, shell=True)
 
 if __name__ == '__main__':
