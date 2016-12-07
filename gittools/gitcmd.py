@@ -21,7 +21,7 @@ def update_branch(branch_name):
                         branch_name], shell=True)
 
 
-def diverged_from(branch='master'):
+def unmerged(branch='master'):
     """ Returns branches names that are not conained in ``branch`` """
     tmp = check_output(['git branch --no-merged %s' % branch], shell=True)
     return clean_lines_star_cr(tmp.split())
