@@ -44,10 +44,8 @@ class DefaultTestCase(TestCase):
     def setUp(self):
         self.repodir = join(directory, 'repo_rebase_testbase_%s' % rand())
         os.mkdir(self.repodir)
-
-    def test_base(self):
         os.chdir(self.repodir)
-        target = 'targetbranch'
+        self.targetbranch = target = 'targetbranch'
         statements = ['git init ',
                       'git checkout -b %s' % target,
                       'touch file1',
@@ -69,6 +67,9 @@ class DefaultTestCase(TestCase):
         for statement in statements:
             check_call(statement, shell=True, stdout=devnull, stderr=devnull)
 
+    def test_base(self):
+        target = self.targetbranch
+
         self.assertEqual(one(gitcmd.broader_than(target)), 'broader')
 
         self.assertEqual(gitcmd.unmerged(target), set(['broader', 'branch_to_rebase']))
@@ -77,14 +78,34 @@ class DefaultTestCase(TestCase):
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
 
-        rebase_result = autorebase.main(target=target, update_target=False)
+        rebase_result = autorebase._main(target=target, sync_target=False)
 
         self.assertEqual(rebase_result['failed'], [])
         self.assertEqual(rebase_result['succeeded'], ['branch_to_rebase'])
 
         self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
 
+
+    def test_command(self):
+        #This test seems dirty to me ...
+        target = self.targetbranch
+
+        self.assertEqual(one(gitcmd.broader_than(target)), 'broader')
+
+        self.assertEqual(gitcmd.unmerged(target), set(['broader', 'branch_to_rebase']))
+
+        branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
+
+        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
+        rebase_result = check_call('autorebase --target-branch=%s' % target, shell=True)
+
+
+        self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
+
+
+
     def tearDown(self):
+        os.chdir('..')
         check_call('rm -rf %s' %  self.repodir, shell=True)
 
 if __name__ == '__main__':

@@ -11,16 +11,28 @@ Goals:
 import sys
 from subprocess import check_call, CalledProcessError
 
-from gitcmd import update_branch, unmerged,  broader_than
+from gitcmd import sync_branch, unmerged,  broader_than
 
+import argparse
+
+parser = argparse.ArgumentParser('Automatic rebaser')
+parser.add_argument('--sync-target', '-s', action='store_true',
+                    help="Pulls and pushes the target "
+                         "branch prior to rebasing")
+parser.add_argument('--target-branch', '-t', default='master',
+                    help="name of the branch to rebase onto"
+                    )
 
 def shouldnot_rebase_branch(branch_name):
     return 'norebase' in branch_name
 
+def main():
+     params = parser.parse_args()
+     _main(target=params.target_branch, sync_target=params.sync_target)
 
-def main(target='master', update_target=True):
-    if update_target:
-        update_branch(target)
+def _main(target='master', sync_target=True):
+    if sync_target:
+        sync_branch(target)
     diverged = unmerged(branch=target)
 
     broader = broader_than(branch=target)
