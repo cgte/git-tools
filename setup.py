@@ -8,7 +8,8 @@ setup(name='git-tools',
       description="Tools for everyday git use",
       long_description="""\
 """,
-      classifiers=[], # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
+      classifiers=[],
+      # Get strings from http://pypi.python.org/pypi?%3Aaction=list_classifiers
       keywords='git',
       author='Colin Goutte',
       author_email='cgte@bk.ru',
@@ -20,7 +21,7 @@ setup(name='git-tools',
       install_requires=[
           # -*- Extra requirements: -*-
       ],
-      entry_points="""
-      # -*- Entry points: -*-
-      """,
+      entry_points={
+          'console_scripts':
+          ['autorebase = gittools.autorebase:main']},
       )
