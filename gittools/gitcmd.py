@@ -5,7 +5,30 @@ Simple git commands
 Note: improve later using advice : http://stackoverflow.com/questions/3846380/
 
 """
-from subprocess import check_output
+from subprocess import check_output, check_call
+
+from contextlib import contextmanager
+
+
+@contextmanager
+def backandforth():
+    """
+    Put you back on the branch that were checked out when starting some work
+    """
+    initial_branch = current_branch()
+    yield
+    check_call('git checkout %s' % initial_branch, shell=True)
+
+def current_branch():
+    """
+    Return current branch
+    """
+    branches = check_output('git branch', shell=True).split('\n')
+
+    checked_out = [b.strip(' *\n') for b in branches
+                   if b.startswith('*')]
+    return checked_out[0]
+
 
 
 def clean_lines_star_cr(branches_output_lines):
