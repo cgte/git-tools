@@ -11,7 +11,7 @@ Goals:
 import sys
 from subprocess import check_call, CalledProcessError
 
-from gitcmd import sync_branch, unmerged,  broader_than
+from gitcmd import sync_branch, unmerged,  broader_than, goback
 
 import argparse
 
@@ -38,6 +38,7 @@ def main():
      _main(target=params.target_branch, sync_target=params.sync_target,
            branch=params.branch)
 
+@goback
 def _main(target='master', sync_target=True, branch=None):
     if sync_target:
         sync_branch(target)

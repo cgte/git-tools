@@ -9,6 +9,18 @@ from subprocess import check_output, check_call
 
 from contextlib import contextmanager
 
+from functools import wraps
+
+
+
+def goback(function):
+    @wraps(function)
+    def wrapped(*args, **kwargs):
+        with backandforth():
+            return function(*args, **kwargs)
+    return wrapped
+
+
 
 @contextmanager
 def backandforth():
