@@ -49,14 +49,14 @@ def _main(target='master', sync_target=True, branch=None):
 
     to_rebase = diverged - broader if not branch else [branch,]
 
-    print 'branches to be rebased: ', ' ,'.join(to_rebase)
+    log.info('branches to be rebased: %s',  ' ,'.join(to_rebase))
 
     failed, success = [], []
     sys.stdout.flush()
     for branch in to_rebase:
         if shouldnot_rebase_branch(branch):
             continue
-        print 'rebasing ', branch
+        log.info('rebasing %s', branch)
         try:
             check_call(['git rebase %s %s' % (target, branch)],
                        shell=True)
