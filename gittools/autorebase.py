@@ -8,7 +8,7 @@ Goals:
 
 """
 
-import sys
+import sys, shlex
 from subprocess import check_call, CalledProcessError
 
 from gitcmd import sync_branch, unmerged,  broader_than, goback
@@ -18,36 +18,36 @@ import argparse
 import logging as log
 
 parser = argparse.ArgumentParser('Automatic rebaser')
-parser.add_argument('--sync-target', '-s', action='store_true',
-                    help="Pulls and pushes the target "
-                         "branch prior to rebasing")
 parser.add_argument('--target-branch', '-t', default='master',
                     help="name of the branch to rebase onto"
                     )
-
+parser.add_argument('--sync-target', '-s', action='store_const',
+                    const=False, default=True,
+                    help="Pulls and pushes the target "
+                         "branch prior to rebasing")
 parser.add_argument('--branch', '-b', default=None,
                     help="specify only one branch to rebase")
-
 
 
 def shouldnot_rebase_branch(branch_name):
     return 'norebase' in branch_name
 
-def main():
-     params = parser.parse_args()
-     _main(target=params.target_branch, sync_target=params.sync_target,
-           branch=params.branch)
+
+def main(params=''):
+    params = vars(parser.parse_args(shlex.split(params))) if params else vars(parser.parse_args())
+    autorebase(**params)
+
 
 @goback
-def _main(target='master', sync_target=True, branch=None):
+def autorebase(target_branch, sync_target, branch):
     if sync_target:
-        sync_branch(target)
-    diverged = unmerged(branch=target)
+        sync_branch(target_branch)
+    diverged = unmerged(branch=target_branch)
     log.warn("Diverged \n %r" % list(diverged))
-    broader = broader_than(branch=target)
+    broader = broader_than(branch=target_branch)
     log.warn("Broader \n %r" % list(broader))
 
-    to_rebase = diverged - broader if not branch else [branch,]
+    to_rebase = diverged - broader if not branch else [branch, ]
 
     log.info('branches to be rebased: %s',  ' ,'.join(to_rebase))
 
@@ -58,7 +58,7 @@ def _main(target='master', sync_target=True, branch=None):
             continue
         log.info('rebasing %s', branch)
         try:
-            check_call(['git rebase %s %s' % (target, branch)],
+            check_call(['git rebase %s %s' % (target_branch, branch)],
                        shell=True)
             success.append(branch)
         except CalledProcessError:

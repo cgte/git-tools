@@ -68,22 +68,23 @@ class DefaultTestCase(TestCase):
             check_call(statement, shell=True, stdout=devnull, stderr=devnull)
 
     def test_base(self):
-        target = self.targetbranch
+        target_branch = self.targetbranch
 
-        self.assertEqual(one(gitcmd.broader_than(target)), 'broader')
+        self.assertEqual(one(gitcmd.broader_than(target_branch)), 'broader')
 
-        self.assertEqual(gitcmd.unmerged(target), set(['broader', 'branch_to_rebase']))
+        self.assertEqual(gitcmd.unmerged(target_branch), set(['broader', 'branch_to_rebase']))
 
-        branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
+        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(target_branch)
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
 
-        rebase_result = autorebase._main(target=target, sync_target=False)
+        rebase_result = autorebase.autorebase(target_branch=target_branch, sync_target=False,
+                                              branch=None)
 
         self.assertEqual(rebase_result['failed'], [])
         self.assertEqual(rebase_result['succeeded'], ['branch_to_rebase'])
 
-        self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
+        self.assertEqual(gitcmd.broader_than(target_branch), set(['branch_to_rebase', 'broader']))
 
 
     def test_command(self):
@@ -97,12 +98,15 @@ class DefaultTestCase(TestCase):
         branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
-        rebase_result = check_call('autorebase --target-branch=%s' % target, shell=True)
+        rebase_result = check_call('autorebase --target-branch=%s -s' % target, shell=True)
 
 
         self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
 
+    def test_cover_main(self):
+        target = self.targetbranch
 
+        autorebase.main('--target-branch=%s -s' % target)
 
     def tearDown(self):
         os.chdir('..')
