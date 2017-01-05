@@ -11,7 +11,7 @@ from contextlib import contextmanager
 
 from functools import wraps
 
-
+import logging
 
 def goback(function):
     @wraps(function)
@@ -55,7 +55,7 @@ def sync_branch(branch_name):
     output = check_output(['git checkout %s && git pull && git push' %
                            branch_name],
                           shell=True)
-    log.info(output)
+    logging.info(output)
 
 
 def unmerged(branch='master'):
