@@ -14,6 +14,8 @@ from contextlib import contextmanager
 
 from subprocess import check_call
 
+import mock
+
 
 from os.path import splitext, abspath, dirname, join
 import os
@@ -33,6 +35,16 @@ def one(iterable):
 def rand(N=4):
     return str(randint(0, 10**N)).zfill(N)
 
+
+class CoverTestCase(TestCase):
+    @mock.patch('gittools.gitcmd.check_output')
+    def test_cover(self, mocked):
+
+        #cover the sync branch system call
+        gitcmd.sync_branch('master')
+        mocked.assert_called_with(
+            ['git checkout master && git pull && git push'],
+            shell=True)
 
 class DefaultTestCase(TestCase):
     """

@@ -52,8 +52,10 @@ def clean_lines_star_cr(branches_output_lines):
 
 
 def sync_branch(branch_name):
-    print check_output(['git checkout %s && git pull && git push' %
-                        branch_name], shell=True)
+    output = check_output(['git checkout %s && git pull && git push' %
+                           branch_name],
+                          shell=True)
+    log.info(output)
 
 
 def unmerged(branch='master'):
