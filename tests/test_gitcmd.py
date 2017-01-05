@@ -26,12 +26,6 @@ directory = abspath(dirname(__file__))
 
 devnull = open(os.devnull, 'w')
 
-def one(iterable):
-    content = list(iterable)
-    if len(iterable) != 1:
-        raise ValueError("More than one element in %r" % content)
-    return content[0]
-
 def rand(N=4):
     return str(randint(0, 10**N)).zfill(N)
 
