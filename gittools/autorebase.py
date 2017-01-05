@@ -66,7 +66,3 @@ def autorebase(target_branch, sync_target, branch):
             failed.append(branch)
 
     return {'failed': failed, 'succeeded': success}
-
-
-if __name__ == '__main__':
-    print(main())
