@@ -32,6 +32,13 @@ def backandforth():
     check_call('git checkout %s' % initial_branch, shell=True)
 
 
+def branches():
+    branches = check_output('git branch', shell=True).split('\n')
+
+    branches = [b.strip(' *\n') for b in branches]
+
+    return branches
+
 def current_branch():
     """
     Return current branch
@@ -53,11 +60,35 @@ def clean_lines_star_cr(branches_output_lines):
 
 
 def sync_branch(branch_name):
+    #pull(branch_name)
+    #push()
     output = check_output(['git checkout %s && git pull && git push' %
                            branch_name],
                           shell=True)
     logging.info(output)
 
+def pull(branch_name):
+    #Bypass sync branch, smetimes you cannot push.
+    available_branches =  branches()
+    if branch_name not in available_branches:
+        log.warn("No branch named %r skipping", branch_name)
+
+    output = check_output(['git checkout %s && git pull' %
+                           branch_name],
+                          shell=True)
+    logging.info(output)
+
+def push():
+    ret = None
+    try:
+        output = check_output(['git push'],
+                              shell=True)
+        logging.info(output)
+        ret = True
+    except Exception as e:
+        print e
+        ret = False
+    return ret
 
 def unmerged(branch='master'):
     """ Returns branches names that are not conained in ``branch`` """
