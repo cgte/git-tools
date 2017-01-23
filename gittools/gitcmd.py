@@ -11,6 +11,7 @@ from contextlib import contextmanager
 
 from functools import wraps
 
+import os
 import logging
 
 def goback(function):
@@ -21,7 +22,6 @@ def goback(function):
     return wrapped
 
 
-
 @contextmanager
 def backandforth():
     """
@@ -30,6 +30,7 @@ def backandforth():
     initial_branch = current_branch()
     yield
     check_call('git checkout %s' % initial_branch, shell=True)
+
 
 def current_branch():
     """
@@ -73,6 +74,11 @@ def broader_than(branch='master'):
     return clean_lines_star_cr(tmp.split()) - set([branch])
 
 
-def has_diff():
+def has_diff(path_to_repo=None):
+    if path_to_repo:
+        here = os.path.abspath(os.getcwd())
+        os.chdir(path_to_repo)
     tmp = check_output(['git', 'diff', 'HEAD']).strip(' \n')
+    if path_to_repo:
+        os.chdir(here)
     return bool(tmp)

@@ -82,17 +82,25 @@ class DefaultTestCase(TestCase):
         for statement in statements:
             check_call(statement, shell=True, stdout=devnull, stderr=devnull)
 
-        self.assertFalse(gitcmd.has_diff())
+        self.assertFalse(gitcmd.has_diff('.'))
 
         #modifiy and chech for diff
         check_call('echo "plop" >> file1', shell=True)
         self.assertTrue(gitcmd.has_diff())
         check_call('git add file1', shell=True)
+
+        os.chdir('..')
+
+        self.assertTrue(gitcmd.has_diff(self.repodir))
+
+        os.chdir(self.repodir)
+
         self.assertTrue(gitcmd.has_diff())
 
         check_call('git commit -m "PLop" file1', shell=True)
 
         self.assertFalse(gitcmd.has_diff())
+
 
 
     def tearDown(self):
