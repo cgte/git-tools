@@ -90,6 +90,11 @@ class DefaultTestCase(TestCase):
         check_call('git add file1', shell=True)
         self.assertTrue(gitcmd.has_diff())
 
+        check_call('git commit -m "PLop" file1', shell=True)
+
+        self.assertFalse(gitcmd.has_diff())
+
+
     def tearDown(self):
         os.chdir('..')
         check_call('rm -rf %s' %  self.repodir, shell=True)
