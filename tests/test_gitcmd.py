@@ -73,8 +73,22 @@ class DefaultTestCase(TestCase):
         self.assertEqual(branch2, name2)
         self.assertEqual(gitcmd.current_branch(), name)
 
+    def test_diff(self):
+        statements = ['git init ',
+                      'touch file1',
+                      'git add file1',
+                      "git commit -m 'add file1' file1",
+                      ]
+        for statement in statements:
+            check_call(statement, shell=True, stdout=devnull, stderr=devnull)
 
+        self.assertFalse(gitcmd.has_diff())
 
+        #modifiy and chech for diff
+        check_call('echo "plop" >> file1', shell=True)
+        self.assertTrue(gitcmd.has_diff())
+        check_call('git add file1', shell=True)
+        self.assertTrue(gitcmd.has_diff())
 
     def tearDown(self):
         os.chdir('..')

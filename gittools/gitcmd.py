@@ -71,3 +71,8 @@ def broader_than(branch='master'):
     tmp = check_output(['git branch --contains %s' % branch],
                        shell=True)
     return clean_lines_star_cr(tmp.split()) - set([branch])
+
+
+def has_diff():
+    tmp = check_output(['git', 'diff', 'HEAD']).strip(' \n')
+    return bool(tmp)
