@@ -9,60 +9,65 @@ I have multiples repos i may want to sync.
 
 from subprocess import CalledProcessError
 import os
-from gitcmd import has_diff, backandforth, pull, push
+from gitcmd import has_diff, backandforth, pull, push, fetch, origin_diff
 import sys
 
-try:
-    import pdb
-    pdb.set_trace()
-    path = sys.argv[1]
-    os.chdir(path)
+def main():
 
-except IndexError:
-    sys.exit(1)
+    try:
+        path = sys.argv[1]
+    except IndexError:
+        path = os.getcwd()
 
 
-directories =  [os.path.abspath(x) for x in os.listdir(path) if os.path.isdir(x)]
-git_repos = [directory for directory in directories if '.git' in os.listdir(directory) ]
+    directories =  [os.path.abspath(x) for x in os.listdir(path) if os.path.isdir(x)]
+    git_repos = [directory for directory in directories if '.git' in os.listdir(directory) ]
 
-upgradable_repos = [repo for repo in git_repos if not has_diff(repo)]
+    upgradable_repos = [repo for repo in git_repos if not has_diff(repo)]
 
-def is_gitsvn(repo=None):
-    here =  os.getcwd()
-    if repo:
-        os.chdir(repo)
-    res = os.path.exists('.git/svn')
-    if repo:
-        os.chdir(here)
-    return res
+    def is_gitsvn(repo=None):
+        here =  os.getcwd()
+        if repo:
+            os.chdir(repo)
+        res = os.path.exists('.git/svn')
+        if repo:
+            os.chdir(here)
+        return res
 
 
 
-from pprint import pprint
-pprint(git_repos)
-print '*' * 80
-print 'Upgradable repo'
-pprint(upgradable_repos)
-print "repos with diff"
-pprint(list(set(git_repos) - set(upgradable_repos)))
+    from pprint import pprint
+    pprint(git_repos)
+    print '*' * 80
+    print 'Upgradable repo'
+    pprint(upgradable_repos)
+    print "repos with diff"
+    pprint(list(set(git_repos) - set(upgradable_repos)))
 
-here = os.path.abspath(os.getcwd())
+    here = os.path.abspath(os.getcwd())
 
-for repo in upgradable_repos:
-    if is_gitsvn(repo):
-        print repo, 'is a git svn repo not handled yet' # The is an origin, remote issue
+    for repo in upgradable_repos:
+        if is_gitsvn(repo):
+            print repo, 'is a git svn repo not handled yet' # The is an origin, remote issue
 
-        continue
-    os.chdir(repo)
-    with backandforth():
-        print repo
-        try:
-            pull('master')
-        except Exception as e:
-            print e
             continue
-        if not push():
-            print '#####################################'
-            print 'push failed for'
-            print os.getcwd()
-os.chdir(here)
+        os.chdir(repo)
+        with backandforth():
+            print repo
+            fetch()
+            try:
+                if origin_diff():
+                    print 'pulling master'
+                    pull('master')
+                if not push():
+                    print '#####################################'
+                    print 'push failed for'
+                    print os.getcwd()
+            except Exception as e:
+                print e
+                continue
+    os.chdir(here)
+
+
+if __name__ == '__main__':
+    main()
