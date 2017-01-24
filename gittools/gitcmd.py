@@ -78,6 +78,16 @@ def pull(branch_name):
                           shell=True)
     logging.info(output)
 
+def fetch():
+    out = check_output(['git fetch origin'], shell=True)
+    print out
+
+def origin_diff():
+    out = check_output(['git diff master origin/master'], shell=True)
+    return out
+
+
+
 def push():
     ret = None
     try:
