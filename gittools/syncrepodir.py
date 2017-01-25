@@ -46,7 +46,7 @@ def main():
 
     here = os.path.abspath(os.getcwd())
 
-    for repo in upgradable_repos:
+    for repo in git_repos:
         if is_gitsvn(repo):
             print repo, 'is a git svn repo not handled yet' # The is an origin, remote issue
 
@@ -55,6 +55,8 @@ def main():
         with backandforth():
             print repo
             fetch()
+            if repo not in upgradable_repos:
+                contitnue
             try:
                 if origin_diff():
                     print 'pulling master'
