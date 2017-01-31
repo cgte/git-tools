@@ -49,14 +49,13 @@ def main():
     for repo in git_repos:
         if is_gitsvn(repo):
             print repo, 'is a git svn repo not handled yet' # The is an origin, remote issue
-
             continue
         os.chdir(repo)
         with backandforth():
             print repo
             fetch()
             if repo not in upgradable_repos:
-                contitnue
+                continue
             try:
                 if origin_diff():
                     print 'pulling master'
