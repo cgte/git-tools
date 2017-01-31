@@ -19,9 +19,13 @@ def main():
     except IndexError:
         path = os.getcwd()
 
+    path = os.path.abspath(os.path.expanduser(path))
 
-    directories =  [os.path.abspath(x) for x in os.listdir(path) if os.path.isdir(x)]
-    git_repos = [directory for directory in directories if '.git' in os.listdir(directory) ]
+    git_repos = []
+    for x in os.listdir(path):
+        repopath = os.path.join(path, x)
+        if os.path.isdir(os.path.join(repopath, '.git')):
+            git_repos.append(repopath)
 
     upgradable_repos = [repo for repo in git_repos if not has_diff(repo)]
 
