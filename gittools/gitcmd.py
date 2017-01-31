@@ -14,6 +14,8 @@ from functools import wraps
 import os
 import logging
 
+from .utils import silent, devnull
+
 def goback(function):
     @wraps(function)
     def wrapped(*args, **kwargs):
@@ -29,7 +31,7 @@ def backandforth():
     """
     initial_branch = current_branch()
     yield
-    check_call('git checkout %s' % initial_branch, shell=True)
+    check_call('git checkout %s' % initial_branch, shell=True, **silent)
 
 
 def branches():
@@ -64,8 +66,9 @@ def sync_branch(branch_name):
     #push()
     output = check_output(['git checkout %s && git pull && git push' %
                            branch_name],
+                          stderr=devnull,
                           shell=True)
-    logging.info(output)
+    #logging.info(output)
 
 def pull(branch_name):
     #Bypass sync branch, smetimes you cannot push.
@@ -75,7 +78,8 @@ def pull(branch_name):
 
     output = check_output(['git checkout %s && git pull' %
                            branch_name],
-                          shell=True)
+                          shell=True,
+                          stderr=devnull)
     logging.info(output)
 
 def fetch():

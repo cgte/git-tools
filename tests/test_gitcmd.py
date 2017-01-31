@@ -22,9 +22,10 @@ import os
 
 from gittools import gitcmd
 
+from .utils import silent
+
 directory = abspath(dirname(__file__))
 
-devnull = open(os.devnull, 'w')
 
 def rand(N=4):
     return str(randint(0, 10**N)).zfill(N)
@@ -38,6 +39,7 @@ class CoverTestCase(TestCase):
         gitcmd.sync_branch('master')
         mocked.assert_called_with(
             ['git checkout master && git pull && git push'],
+            stderr=gitcmd.devnull,
             shell=True)
 
 class DefaultTestCase(TestCase):
@@ -50,7 +52,7 @@ class DefaultTestCase(TestCase):
         self.repodir = join(directory, 'repo_cmd_testbase_%s' % rand())
         os.mkdir(self.repodir)
         os.chdir(self.repodir)
-        check_call('git init .', shell=True)
+        check_call('git init .', shell=True, **silent)
 
     def test_branch(self):
 
@@ -60,13 +62,13 @@ class DefaultTestCase(TestCase):
                       "git commit -m 'add file1' file1",
                       ]
         for statement in statements:
-            check_call(statement, shell=True, stdout=devnull, stderr=devnull)
+            check_call(statement, shell=True, **silent)
 
         name = 'plop'
-        check_call('git checkout -b %s' % name, shell=True)
+        check_call('git checkout -b %s' % name, shell=True, **silent)
         with gitcmd.backandforth():
             name2 = 'plip'
-            check_call('git checkout -b %s' % name2, shell=True)
+            check_call('git checkout -b %s' % name2, shell=True, **silent)
             branch2 = gitcmd.current_branch()
 
 
@@ -80,7 +82,7 @@ class DefaultTestCase(TestCase):
                       "git commit -m 'add file1' file1",
                       ]
         for statement in statements:
-            check_call(statement, shell=True, stdout=devnull, stderr=devnull)
+            check_call(statement, shell=True, **silent)
 
         self.assertFalse(gitcmd.has_diff('.'))
 
@@ -97,7 +99,7 @@ class DefaultTestCase(TestCase):
 
         self.assertTrue(gitcmd.has_diff())
 
-        check_call('git commit -m "PLop" file1', shell=True)
+        check_call('git commit -m "PLop" file1', shell=True, **silent)
 
         self.assertFalse(gitcmd.has_diff())
 

@@ -17,6 +17,8 @@ import argparse
 
 import logging as log
 
+from utils import silent, devnull
+
 parser = argparse.ArgumentParser('Automatic rebaser')
 parser.add_argument('--target-branch', '-t', default='master',
                     help="name of the branch to rebase onto"
@@ -43,9 +45,9 @@ def autorebase(target_branch, sync_target, branch):
     if sync_target:
         sync_branch(target_branch)
     diverged = unmerged(branch=target_branch)
-    log.warn("Diverged \n %r" % list(diverged))
+    log.info("Diverged \n %r" % list(diverged))  #This should be displayed
     broader = broader_than(branch=target_branch)
-    log.warn("Broader \n %r" % list(broader))
+    log.info("Broader \n %r" % list(broader))  #This shou;d be displayed too
 
     to_rebase = diverged - broader if not branch else [branch, ]
 
@@ -59,10 +61,11 @@ def autorebase(target_branch, sync_target, branch):
         log.info('rebasing %s', branch)
         try:
             check_call(['git rebase %s %s' % (target_branch, branch)],
-                       shell=True)
+                       shell=True,
+                       **silent)
             success.append(branch)
         except CalledProcessError:
-            check_call(['git rebase --abort'], shell=True)
+            check_call(['git rebase --abort'], shell=True, **silent)
             failed.append(branch)
 
     return {'failed': failed, 'succeeded': success}

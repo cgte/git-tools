@@ -21,9 +21,10 @@ import os
 from gittools import gitcmd
 from gittools import autorebase
 
+from .utils import silent
+
 directory = abspath(dirname(__file__))
 
-devnull = open(os.devnull, 'w')
 
 def one(iterable):
     content = list(iterable)
@@ -65,7 +66,7 @@ class DefaultTestCase(TestCase):
                       "git commit -m 'some heavy work on file 1' file1"
                       ]
         for statement in statements:
-            check_call(statement, shell=True, stdout=devnull, stderr=devnull)
+            check_call(statement, shell=True, **silent)
 
     def test_base(self):
         target_branch = self.targetbranch
@@ -98,7 +99,8 @@ class DefaultTestCase(TestCase):
         branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
-        rebase_result = check_call('autorebase --target-branch=%s -s' % target, shell=True)
+        rebase_result = check_call('autorebase --target-branch=%s -s' % target, shell=True,
+                                   **silent)
 
 
         self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
