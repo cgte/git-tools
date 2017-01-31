@@ -113,6 +113,54 @@ class DefaultTestCase(TestCase):
         self.assertRaises(DeprecationWarning, autorebase.autorebase,
                           *[None, None], **{'sync_target':True})
 
+        # No this would mean we are testing argparse since arguemnt is dusabled
+        #with self.assertRaises(DeprecationWarning):
+        #    autorebase.main('--target-branch=%s -s' % target)
+
+
+    def tearDown(self):
+        os.chdir('..')
+        check_call('rm -rf %s' %  self.repodir, shell=True)
+
+class RebaseFailTestCase(TestCase):
+
+    def setUp(self):
+        self.repodir = join(directory, 'repo_rebase__fail_testbase_%s' % rand())
+        os.mkdir(self.repodir)
+        os.chdir(self.repodir)
+        self.targetbranch = target = 'targetbranch'
+        statements = ['git init ',
+                      'git checkout -b %s' % target,
+                      'touch file1',
+                      'git add file1',
+                      "git commit -m 'add file1' file1",
+                      "echo 'abce' > file1",
+                      "git commit -m 'fill file1' file1",
+                      "git checkout HEAD^",
+                      'git checkout -b branch_to_rebase',
+                      "echo 'abi5435e' > file1",
+                      "git add file1",
+                      "git commit -m 'add file to be rebased'",
+                      # Go back on working branch
+                      ]
+        for statement in statements:
+            check_call(statement, shell=True, **silent)
+
+    def test_base(self):
+        target_branch = self.targetbranch
+
+        self.assertEqual(gitcmd.unmerged(target_branch), set(['branch_to_rebase']))
+
+        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(target_branch)
+
+        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
+
+        rebase_result = autorebase.autorebase(target_branch=target_branch,
+                                              branch=None)
+
+        self.assertEqual(rebase_result['failed'], ['branch_to_rebase'])
+        self.assertEqual(rebase_result['succeeded'], [])
+
 
 
     def tearDown(self):

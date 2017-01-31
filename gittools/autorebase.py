@@ -28,14 +28,15 @@ parser.add_argument('--branch', '-b', default=None,
 
 
 def shouldnot_rebase_branch(branch_name):
+    """
+    >>> shouldnot_rebase_branch('valuable_research_norebase')
+    False
+    """
     return 'norebase' in branch_name
 
 
 def main(params=''):
     params = vars(parser.parse_args(shlex.split(params))) if params else vars(parser.parse_args())
-    if 'sync_target' in params:
-        raise DeprecationWarning('Sync target is depreciated')
-
     autorebase(**params)
 
 
@@ -49,14 +50,14 @@ def autorebase(target_branch, branch, **kwargs):
     log.info("Broader \n %r" % list(broader))  #This shou;d be displayed too
 
     to_rebase = diverged - broader if not branch else [branch, ]
+    to_rebase = [branch for branch in to_rebase if
+                 not shouldnot_rebase_branch(branch)]
 
     log.info('branches to be rebased: %s',  ' ,'.join(to_rebase))
 
     failed, success = [], []
     sys.stdout.flush()
     for branch in to_rebase:
-        if shouldnot_rebase_branch(branch):
-            continue
         log.info('rebasing %s', branch)
         try:
             check_call(['git rebase %s %s' % (target_branch, branch)],

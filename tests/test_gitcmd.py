@@ -42,6 +42,7 @@ class CoverTestCase(TestCase):
             stderr=gitcmd.devnull,
             shell=True)
 
+
 class DefaultTestCase(TestCase):
     """
     Creates a branch, rewind
