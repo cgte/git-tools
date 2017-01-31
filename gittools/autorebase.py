@@ -23,10 +23,6 @@ parser = argparse.ArgumentParser('Automatic rebaser')
 parser.add_argument('--target-branch', '-t', default='master',
                     help="name of the branch to rebase onto"
                     )
-parser.add_argument('--sync-target', '-s', action='store_const',
-                    const=False, default=True,
-                    help="Pulls and pushes the target "
-                         "branch prior to rebasing")
 parser.add_argument('--branch', '-b', default=None,
                     help="specify only one branch to rebase")
 
@@ -37,13 +33,16 @@ def shouldnot_rebase_branch(branch_name):
 
 def main(params=''):
     params = vars(parser.parse_args(shlex.split(params))) if params else vars(parser.parse_args())
+    if 'sync_target' in params:
+        raise DeprecationWarning('Sync target is depreciated')
+
     autorebase(**params)
 
 
 @goback
-def autorebase(target_branch, sync_target, branch):
-    if sync_target:
-        sync_branch(target_branch)
+def autorebase(target_branch, branch, **kwargs):
+    if 'sync_target' in kwargs:
+        raise DeprecationWarning('Sync target is depreciated')
     diverged = unmerged(branch=target_branch)
     log.info("Diverged \n %r" % list(diverged))  #This should be displayed
     broader = broader_than(branch=target_branch)

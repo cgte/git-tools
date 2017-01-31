@@ -79,7 +79,7 @@ class DefaultTestCase(TestCase):
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
 
-        rebase_result = autorebase.autorebase(target_branch=target_branch, sync_target=False,
+        rebase_result = autorebase.autorebase(target_branch=target_branch,
                                               branch=None)
 
         self.assertEqual(rebase_result['failed'], [])
@@ -99,7 +99,7 @@ class DefaultTestCase(TestCase):
         branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
 
         self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
-        rebase_result = check_call('autorebase --target-branch=%s -s' % target, shell=True,
+        rebase_result = check_call('autorebase --target-branch=%s' % target, shell=True,
                                    **silent)
 
 
@@ -108,7 +108,12 @@ class DefaultTestCase(TestCase):
     def test_cover_main(self):
         target = self.targetbranch
 
-        autorebase.main('--target-branch=%s -s' % target)
+        autorebase.main('--target-branch=%s' % target)
+
+        self.assertRaises(DeprecationWarning, autorebase.autorebase,
+                          *[None, None], **{'sync_target':True})
+
+
 
     def tearDown(self):
         os.chdir('..')
