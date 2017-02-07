@@ -53,19 +53,19 @@ def autorebase(target_branch, branch, **kwargs):
     to_rebase = [branch for branch in to_rebase if
                  not shouldnot_rebase_branch(branch)]
 
-    log.info('branches to be rebased: %s',  ' ,'.join(to_rebase))
+    log.warn('branches to be rebased: %s',  ' ,'.join(to_rebase))
 
     failed, success = [], []
     sys.stdout.flush()
     for branch in to_rebase:
-        log.info('rebasing %s', branch)
+        log.warn('rebasing %s', branch)
         try:
             check_call(['git rebase %s %s' % (target_branch, branch)],
                        shell=True,
-                       **silent)
+                       )
             success.append(branch)
         except CalledProcessError:
-            check_call(['git rebase --abort'], shell=True, **silent)
+            check_call(['git rebase --abort'], shell=True)
             failed.append(branch)
 
     return {'failed': failed, 'succeeded': success}
