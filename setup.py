@@ -24,5 +24,6 @@ setup(name='git-tools',
       entry_points={
           'console_scripts':
           ['autorebase = gittools.autorebase:main',
-           'syncgitdir = gittools.syncrepodir:main']},
+           'syncgitdir = gittools.syncrepodir:main',
+           'syncfeatures = gittools.syncfeatures:main']},
       )
