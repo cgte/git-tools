@@ -38,7 +38,7 @@ def branches():
     branches = check_output('git branch', shell=True).split('\n')
 
     branches = [b.strip(' *\n') for b in branches]
-
+    branches = [b for b in branches if b]
     return branches
 
 def current_branch():

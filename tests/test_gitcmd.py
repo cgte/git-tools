@@ -55,7 +55,7 @@ class DefaultTestCase(TestCase):
         os.chdir(self.repodir)
         check_call('git init .', shell=True, **silent)
 
-    def test_branch(self):
+    def test_current_branch(self):
 
         statements = ['git init ',
                       'touch file1',
@@ -75,6 +75,22 @@ class DefaultTestCase(TestCase):
 
         self.assertEqual(branch2, name2)
         self.assertEqual(gitcmd.current_branch(), name)
+
+    def test_branches(self):
+        branches =  ['branch1', 'branch2']
+        statements = ['touch file1',
+                      'git add file1',
+                      'git commit -m "add file 1"']
+        for statement in statements:
+            check_call(statement, shell=True, **silent)
+        self.assertEqual(gitcmd.branches(), ['master'])
+        created_branches = ['master']
+        for branch in branches:
+            check_call('git checkout -b %s' % branch, shell=True)
+            created_branches.append(branch)
+            self.assertEqual(sorted(created_branches),
+                             sorted(gitcmd.branches())
+                             )
 
     def test_diff(self):
         statements = ['git init ',
