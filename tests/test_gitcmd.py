@@ -8,7 +8,6 @@ Create a repo and some branches. Then try to rebase the giverged ones.
 
 from unittest import TestCase, main
 
-from random import randint
 
 from contextlib import contextmanager
 
@@ -22,13 +21,9 @@ import os
 
 from gittools import gitcmd
 
-from .utils import silent
+from .utils import silent, rand, directory
 
-directory = abspath(dirname(__file__))
-
-
-def rand(N=4):
-    return str(randint(0, 10**N)).zfill(N)
+#directory = abspath(dirname(__file__))
 
 
 class CoverTestCase(TestCase):
