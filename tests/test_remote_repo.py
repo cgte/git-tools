@@ -42,9 +42,16 @@ class RepoWithRemoteTestCase(TestCase):
         os.chdir(join(self.workingdir, 'local'))
 
     def test_simple_pull(self):
+
         # prepare some stuff on remote
         self.gotoremote()
-        check_call('git checkout -b "feature_branch"', shell=True)
+        check_call('git checkout -b "feature_branch" ', shell=True)
+        #back to master to allow pushing on non bare repo
+        check_call('git checkout master ', shell=True)
+
+
+        #coverage only, nowhere to push to
+        self.assertFalse(gitcmd.push())
 
         self.gotolocal()
         gitcmd.fetch()
@@ -55,6 +62,11 @@ class RepoWithRemoteTestCase(TestCase):
         self.assertEqual(sorted(gitcmd.branches()), ['feature_branch',
                                                      'master'])
 
+        check_call('git commit --allow-empty -m "empty push commit"', shell=True)
+
+        gitcmd.origin_diff()  # cover
+
+        gitcmd.push()
 
 
 

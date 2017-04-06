@@ -94,7 +94,7 @@ def origin_diff():
 def push():
     ret = None
     try:
-        output = check_output(['git push'],
+        output = check_output('git push',
                               shell=True)
         log.info(output)
         ret = True
