@@ -12,7 +12,7 @@ from contextlib import contextmanager
 from functools import wraps
 
 import os
-import logging
+import logging as log
 
 from .utils import silent, devnull
 
@@ -68,7 +68,7 @@ def sync_branch(branch_name):
                            branch_name],
                           stderr=devnull,
                           shell=True)
-    #logging.info(output)
+    #log.info(output)
 
 def pull(branch_name):
     #Bypass sync branch, smetimes you cannot push.
@@ -80,7 +80,7 @@ def pull(branch_name):
                            branch_name],
                           shell=True,
                           stderr=devnull)
-    logging.info(output)
+    log.info(output)
 
 def fetch():
     out = check_output(['git fetch origin'], shell=True)
@@ -96,7 +96,7 @@ def push():
     try:
         output = check_output(['git push'],
                               shell=True)
-        logging.info(output)
+        log.info(output)
         ret = True
     except Exception as e:
         print e
