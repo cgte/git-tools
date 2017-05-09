@@ -11,7 +11,7 @@ Goals:
 import sys, shlex
 from subprocess import check_call, CalledProcessError
 
-from gitcmd import unmerged,  broader_than, goback
+from gitcmd import unmerged,  broader_than, goback, branches
 
 import argparse
 
@@ -53,7 +53,20 @@ def sync_features(target_branch, branch, remote='origin', **kwargs):
 
     to_rebase = diverged - broader if not branch else [branch, ]
 
+    remote_branches = set(branches(origin=True))
+
+    noremote = set()
+
+    for branch in to_rebase:
+        #This has no test.
+        if branch not in remote_branches:
+            print '%s is not on remote, not pulling' % branch
+            print 'exectute the folowing for pushing'
+            print 'git push -u origin %s' % branch
+            noremote.add(branch)
+
     to_rebase = [branch for branch in to_rebase if
+                 branch not in noremote and
                  contains_remote_counterpart(branch, remote)]
 
     log.warn('branches to be updated: %s',  ' ,'.join(to_rebase))

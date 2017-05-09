@@ -34,8 +34,12 @@ def backandforth():
     check_call('git checkout %s' % initial_branch, shell=True, **silent)
 
 
-def branches():
-    branches = check_output('git branch', shell=True).split('\n')
+def branches(origin=False):
+    if origin:
+        branches = check_output("git branch -r | sed -s 's:origin/::' | cut -c 3-",
+                                shell=True).split('\n')
+    else:
+        branches = check_output('git branch', shell=True).split('\n')
 
     branches = [b.strip(' *\n') for b in branches]
     branches = [b for b in branches if b]
