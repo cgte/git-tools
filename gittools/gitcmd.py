@@ -5,7 +5,7 @@ Simple git commands
 Note: improve later using advice : http://stackoverflow.com/questions/3846380/
 
 """
-from subprocess import check_output, check_call
+from subprocess import check_output, check_call, Popen
 
 from contextlib import contextmanager
 
@@ -130,3 +130,31 @@ def has_diff(path_to_repo=None):
     if path_to_repo:
         os.chdir(here)
     return bool(tmp)
+
+
+def clean_git_output(in_):
+    ps = Popen("cut -c 3- |  sed 's:^remotes/::' | sed 's:^origin/::' "
+               " | grep -v  '^master$' | grep -v '^HEAD' ",
+               stdin=in_,
+               shell=True)
+    return ps.stdout
+
+def unmerged2():
+    ps = Popen(" git branch -a --no-merged 'master' ", shell=True)
+    ps.wait()
+    return ps.stdout
+
+def branch_descending_latest_tags():
+    ps = Popen(" git tag | sort -rV | sed '5q;d' | xargs git branch -a --contains ",
+             shell=True)
+    return ps.stdout
+
+def rb():
+    """
+    Personal features, checks for features branches that have to be rebased
+    This is useful for having a nice commit tree
+    """
+
+
+
+
