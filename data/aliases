@@ -1,0 +1,12 @@
+[alias]
+    st = status --short
+    sta = status
+    ci = commit
+    co = checkout
+    di = diff
+    br = branch
+    cm = checkout master
+    dm = diff master
+
+    back = checkout -
+
