@@ -27,7 +27,20 @@ def main():
         if os.path.isdir(os.path.join(repopath, '.git')):
             git_repos.append(repopath)
 
-    upgradable_repos = [repo for repo in git_repos if not has_diff(repo)]
+    # bypass bug. could be rewrote as an iterator
+    upgradable_repos = []
+    for repo in git_repos:
+        try:
+            upgradable = not has_diff(repo)
+        except Exception as exc:
+            print "Error happened in repo %s :" % repo
+            print exc
+            continue
+        else:
+            if upgradable:
+                upgradable_repos.append(repo)
+            else:
+                print '%s is not updatable (maybe local diff) skipping' % repo
 
     def is_gitsvn(repo=None):
         here =  os.getcwd()
