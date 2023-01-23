@@ -4,6 +4,9 @@ runner := "poetry"
 
 python_runner := "python"
 
+install:
+    {{python_runner}} -m pip install --user -e .
+
 test:
     {{python_runner}} -m pytest .
 
@@ -16,3 +19,8 @@ tdd:
 clean:
     find . -name "*.pyc" -delete
     git ls-files -o | xargs rm
+    {{python_runner}} -m pip uninstall -y git-tools
+
+
+build: clean install test
+
