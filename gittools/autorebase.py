@@ -71,10 +71,7 @@ def autorebase(target_branch, branch, **kwargs):
     for branch in to_rebase:
         log.warn("rebasing %s", branch)
         try:
-            check_call(
-                ["git rebase %s %s" % (target_branch, branch)],
-                shell=True,
-            )
+            get_lines(f"git rebase {target_branch}  {branch}")
             success.append(branch)
         except CalledProcessError:
             check_call(["git rebase --abort"], shell=True)

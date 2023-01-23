@@ -5,7 +5,7 @@ Simple git commands
 Note: improve later using advice : http://stackoverflow.com/questions/3846380/
 
 """
-from subprocess import check_call, Pipe
+from subprocess import check_call
 import subprocess
 from .commands import get_lines
 from contextlib import contextmanager
@@ -52,7 +52,7 @@ def current_branch():
     """
     Return current branch
     """
-    branches = check_output("git branch", shell=True).split("\n")
+    branches = get_lines("git branch")
 
     checked_out = [b.strip(" *\n") for b in branches if b.startswith("*")]
     return checked_out[0]
@@ -112,16 +112,18 @@ def push():
 
 def unmerged(branch="master"):
     """Returns branches names that are not conained in ``branch``"""
-    tmp = check_output(["git branch --no-merged %s" % branch], shell=True)
-    return clean_lines_star_cr(tmp.split())
+    tmp = get_lines(f"git branch --no-merged {branch}")
+    return clean_lines_star_cr(tmp)
 
 
 def broader_than(branch="master"):
     """
     Returns branches that already contain master
+    cgoutte: `git branch --no-merged $branch --contains $branch`
+    should do the trick
     """
-    tmp = check_output(["git branch --contains %s" % branch], shell=True)
-    return clean_lines_star_cr(tmp.split()) - set([branch])
+    tmp = get_lines(f"git branch --contains {branch}")
+    return clean_lines_star_cr(set(tmp) - set([branch]))
 
 
 def has_diff(path_to_repo=None):
@@ -135,7 +137,7 @@ def has_diff(path_to_repo=None):
 
 
 def clean_git_output(in_):
-    ps = Popen(
+    ps = subprocess.Popen(
         "cut -c 3- |  sed 's:^remotes/::' | sed 's:^origin/::' "
         " | grep -v  '^master$' | grep -v '^HEAD' ",
         stdin=in_,
