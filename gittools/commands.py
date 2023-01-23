@@ -23,13 +23,13 @@ def stripper(text):
     ]
 
 
-def shell(*args, **kwargs):
+def get_lines(*args, **kwargs):
     """ """
     out = _shell(*args, **kwargs).stdout
     lines = stripper(out)
-    return out, lines
+    return lines
 
 
 if __name__ == "__main__":
     run("ls")
-    shell("ls")
+    get_lines("ls")
