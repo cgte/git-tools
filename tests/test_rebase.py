@@ -12,7 +12,7 @@ from random import randint
 
 from contextlib import contextmanager
 
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 
 
 from os.path import splitext, abspath, dirname, join
@@ -32,6 +32,7 @@ def one(iterable):
         raise ValueError("More than one element in %r" % content)
     return content[0]
 
+
 def rand(N=4):
     return str(randint(0, 10**N)).zfill(N)
 
@@ -41,132 +42,146 @@ class DefaultTestCase(TestCase):
     Creates a branch, rewind
     """
 
-
     def setUp(self):
-        self.repodir = join(directory, 'repo_rebase_testbase_%s' % rand())
+        self.repodir = join(directory, "repo_rebase_testbase_%s" % rand())
         os.mkdir(self.repodir)
         os.chdir(self.repodir)
-        self.targetbranch = target = 'targetbranch'
-        statements = ['git init ',
-                      'git checkout -b %s' % target,
-                      'touch file1',
-                      'git add file1',
-                      "git commit -m 'add file1' file1",
-                      "echo 'abce' > file1",
-                      "git commit -m 'fill file1' file1",
-                      "git checkout HEAD^",
-                      'git checkout -b branch_to_rebase',
-                      "echo 'abce' > file2",
-                      "git add file2",
-                      "git commit -m 'add file to be rebased'",
-                      # Go back on working branch
-                      "git checkout %s" % target,
-                      "git checkout -b broader",
-                      "echo 'some content' >> file1 ",
-                      "git commit -m 'some heavy work on file 1' file1"
-                      ]
+        self.targetbranch = target = "targetbranch"
+        statements = [
+            "git init ",
+            "git checkout -b %s" % target,
+            "touch file1",
+            "git add file1",
+            "git commit -m 'add file1' file1",
+            "echo 'abce' > file1",
+            "git commit -m 'fill file1' file1",
+            "git checkout HEAD^",
+            "git checkout -b branch_to_rebase",
+            "echo 'abce' > file2",
+            "git add file2",
+            "git commit -m 'add file to be rebased'",
+            # Go back on working branch
+            "git checkout %s" % target,
+            "git checkout -b broader",
+            "echo 'some content' >> file1 ",
+            "git commit -m 'some heavy work on file 1' file1",
+        ]
         for statement in statements:
             check_call(statement, shell=True, **silent)
 
     def test_base(self):
         target_branch = self.targetbranch
 
-        self.assertEqual(one(gitcmd.broader_than(target_branch)), 'broader')
+        self.assertEqual(one(gitcmd.broader_than(target_branch)), "broader")
 
-        self.assertEqual(gitcmd.unmerged(target_branch), set(['broader', 'branch_to_rebase']))
+        self.assertEqual(
+            gitcmd.unmerged(target_branch), set(["broader", "branch_to_rebase"])
+        )
 
-        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(target_branch)
+        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(
+            target_branch
+        )
 
-        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
+        self.assertEqual(one(branches_to_rebase), "branch_to_rebase")
 
-        rebase_result = autorebase.autorebase(target_branch=target_branch,
-                                              branch=None)
+        rebase_result = autorebase.autorebase(target_branch=target_branch, branch=None)
 
-        self.assertEqual(rebase_result['failed'], [])
-        self.assertEqual(rebase_result['succeeded'], ['branch_to_rebase'])
+        self.assertEqual(rebase_result["failed"], [])
+        self.assertEqual(rebase_result["succeeded"], ["branch_to_rebase"])
 
-        self.assertEqual(gitcmd.broader_than(target_branch), set(['branch_to_rebase', 'broader']))
-
+        self.assertEqual(
+            gitcmd.broader_than(target_branch), set(["branch_to_rebase", "broader"])
+        )
 
     def test_command(self):
-        #This test seems dirty to me ...
+        # This test seems dirty to me ...
+        check_call("which ls", shell=True)
+        try:
+            check_call("which autorebase", shell=True)
+        except CalledProcessError:
+            raise RuntimeError("Auto rebase not in path")
         target = self.targetbranch
 
-        self.assertEqual(one(gitcmd.broader_than(target)), 'broader')
+        self.assertEqual(one(gitcmd.broader_than(target)), "broader")
 
-        self.assertEqual(gitcmd.unmerged(target), set(['broader', 'branch_to_rebase']))
+        self.assertEqual(gitcmd.unmerged(target), set(["broader", "branch_to_rebase"]))
 
         branches_to_rebase = gitcmd.unmerged(target) - gitcmd.broader_than(target)
 
-        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
-        rebase_result = check_call('autorebase --target-branch=%s' % target, shell=True,
-                                   **silent)
+        self.assertEqual(one(branches_to_rebase), "branch_to_rebase")
+        rebase_result = check_call(
+            "autorebase --target-branch=%s" % target, shell=True, **silent
+        )
 
-
-        self.assertEqual(gitcmd.broader_than(target), set(['branch_to_rebase', 'broader']))
+        self.assertEqual(
+            gitcmd.broader_than(target), set(["branch_to_rebase", "broader"])
+        )
 
     def test_cover_main(self):
         target = self.targetbranch
 
-        autorebase.main('--target-branch=%s' % target)
+        autorebase.main("--target-branch=%s" % target)
 
-        self.assertRaises(DeprecationWarning, autorebase.autorebase,
-                          *[None, None], **{'sync_target':True})
+        self.assertRaises(
+            DeprecationWarning,
+            autorebase.autorebase,
+            *[None, None],
+            **{"sync_target": True}
+        )
 
         # No this would mean we are testing argparse since arguemnt is dusabled
-        #with self.assertRaises(DeprecationWarning):
+        # with self.assertRaises(DeprecationWarning):
         #    autorebase.main('--target-branch=%s -s' % target)
 
-
     def tearDown(self):
-        os.chdir('..')
-        check_call('rm -rf %s' %  self.repodir, shell=True)
+        os.chdir("..")
+        check_call("rm -rf %s" % self.repodir, shell=True)
+
 
 class RebaseFailTestCase(TestCase):
-
     def setUp(self):
-        self.repodir = join(directory, 'repo_rebase__fail_testbase_%s' % rand())
+        self.repodir = join(directory, "repo_rebase__fail_testbase_%s" % rand())
         os.mkdir(self.repodir)
         os.chdir(self.repodir)
-        self.targetbranch = target = 'targetbranch'
-        statements = ['git init ',
-                      'git checkout -b %s' % target,
-                      'touch file1',
-                      'git add file1',
-                      "git commit -m 'add file1' file1",
-                      "echo 'abce' > file1",
-                      "git commit -m 'fill file1' file1",
-                      "git checkout HEAD^",
-                      'git checkout -b branch_to_rebase',
-                      "echo 'abi5435e' > file1",
-                      "git add file1",
-                      "git commit -m 'add file to be rebased'",
-                      # Go back on working branch
-                      ]
+        self.targetbranch = target = "targetbranch"
+        statements = [
+            "git init ",
+            "git checkout -b %s" % target,
+            "touch file1",
+            "git add file1",
+            "git commit -m 'add file1' file1",
+            "echo 'abce' > file1",
+            "git commit -m 'fill file1' file1",
+            "git checkout HEAD^",
+            "git checkout -b branch_to_rebase",
+            "echo 'abi5435e' > file1",
+            "git add file1",
+            "git commit -m 'add file to be rebased'",
+            # Go back on working branch
+        ]
         for statement in statements:
             check_call(statement, shell=True, **silent)
 
     def test_base(self):
         target_branch = self.targetbranch
 
-        self.assertEqual(gitcmd.unmerged(target_branch), set(['branch_to_rebase']))
+        self.assertEqual(gitcmd.unmerged(target_branch), set(["branch_to_rebase"]))
 
-        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(target_branch)
+        branches_to_rebase = gitcmd.unmerged(target_branch) - gitcmd.broader_than(
+            target_branch
+        )
 
-        self.assertEqual(one(branches_to_rebase), 'branch_to_rebase')
+        self.assertEqual(one(branches_to_rebase), "branch_to_rebase")
 
-        rebase_result = autorebase.autorebase(target_branch=target_branch,
-                                              branch=None)
+        rebase_result = autorebase.autorebase(target_branch=target_branch, branch=None)
 
-        self.assertEqual(rebase_result['failed'], ['branch_to_rebase'])
-        self.assertEqual(rebase_result['succeeded'], [])
-
-
+        self.assertEqual(rebase_result["failed"], ["branch_to_rebase"])
+        self.assertEqual(rebase_result["succeeded"], [])
 
     def tearDown(self):
-        os.chdir('..')
-        check_call('rm -rf %s' %  self.repodir, shell=True)
+        os.chdir("..")
+        check_call("rm -rf %s" % self.repodir, shell=True)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
-
