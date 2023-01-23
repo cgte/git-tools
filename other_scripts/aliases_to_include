@@ -1,0 +1,6 @@
+[alias]
+    um = ! git co main  && git pull origin && git co -
+    resync =  ! git um && git rebase -
+    forcesync =  ! git  pull --rebase && git resync && git push -f
+    sm = ! git co main  && git reset --hard origin/main
+    # watch git branch -a --no-merged main --contains somme_commt

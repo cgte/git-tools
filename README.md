@@ -1,5 +1,5 @@
 # git-tools
-Some scripts for every git use
+Some scripts for every day git use
 
 This package intends to automatize some git commands for example try to rebase
  all braches that are late onto master.
