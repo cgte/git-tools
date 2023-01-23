@@ -12,7 +12,7 @@ from random import randint
 
 from contextlib import contextmanager
 
-from subprocess import check_call
+from subprocess import check_call, CalledProcessError
 
 
 from os.path import splitext, abspath, dirname, join
@@ -95,6 +95,11 @@ class DefaultTestCase(TestCase):
 
     def test_command(self):
         # This test seems dirty to me ...
+        check_call("which ls", shell=True)
+        try:
+            check_call("which autorebase", shell=True)
+        except CalledProcessError:
+            raise RuntimeError("Auto rebase not in path")
         target = self.targetbranch
 
         self.assertEqual(one(gitcmd.broader_than(target)), "broader")

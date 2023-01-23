@@ -31,9 +31,9 @@ class CoverTestCase(TestCase):
     def test_cover(self, mocked):
 
         # cover the sync branch system call
-        gitcmd.sync_branch("master")
+        gitcmd.sync_branch("main")
         mocked.assert_called_with(
-            ["git checkout master && git pull && git push"],
+            ["git checkout main && git pull && git push"],
             stderr=gitcmd.devnull,
             shell=True,
         )
@@ -76,8 +76,8 @@ class DefaultTestCase(TestCase):
         statements = ["touch file1", "git add file1", 'git commit -m "add file 1"']
         for statement in statements:
             check_call(statement, shell=True, **silent)
-        self.assertEqual(gitcmd.branches(), ["master"])
-        created_branches = ["master"]
+        self.assertEqual(gitcmd.branches(), ["main"])
+        created_branches = ["main"]
         for branch in branches:
             check_call("git checkout -b %s" % branch, shell=True)
             created_branches.append(branch)

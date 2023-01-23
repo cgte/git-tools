@@ -44,19 +44,19 @@ class RepoWithRemoteTestCase(TestCase):
         # prepare some stuff on remote
         self.gotoremote()
         check_call('git checkout -b "feature_branch" ', shell=True)
-        # back to master to allow pushing on non bare repo
-        check_call("git checkout master ", shell=True)
+        # back to main to allow pushing on non bare repo
+        check_call("git checkout main ", shell=True)
 
         # coverage only, nowhere to push to
         self.assertFalse(gitcmd.push())
 
         self.gotolocal()
         gitcmd.fetch()
-        self.assertEqual(gitcmd.branches(), ["master"])
+        self.assertEqual(gitcmd.branches(), ["main"])
 
         gitcmd.pull("feature_branch")
 
-        self.assertEqual(sorted(gitcmd.branches()), ["feature_branch", "master"])
+        self.assertEqual(sorted(gitcmd.branches()), ["feature_branch", "main"])
 
         check_call('git commit --allow-empty -m "empty push commit"', shell=True)
 
