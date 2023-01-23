@@ -11,13 +11,13 @@ Goals:
 import sys, shlex
 from subprocess import check_call, CalledProcessError
 
-from gitcmd import sync_branch, unmerged,  broader_than, goback
+from .gitcmd import sync_branch, unmerged,  broader_than, goback
 
 import argparse
 
 import logging as log
 
-from utils import silent, devnull
+from .utils import silent, devnull
 
 parser = argparse.ArgumentParser('Automatic rebaser')
 parser.add_argument('--target-branch', '-t', default='master',

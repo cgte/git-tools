@@ -11,13 +11,13 @@ Goals:
 import sys, shlex
 from subprocess import check_call, CalledProcessError
 
-from gitcmd import unmerged,  broader_than, goback, branches
+from .gitcmd import unmerged,  broader_than, goback, branches
 
 import argparse
 
 import logging as log
 
-from autorebase import autorebase
+from .autorebase import autorebase
 
 
 parser = argparse.ArgumentParser('Checks your features branches '
@@ -60,9 +60,9 @@ def sync_features(target_branch, branch, remote='origin', **kwargs):
     for branch in to_rebase:
         #This has no test.
         if branch not in remote_branches:
-            print '%s is not on remote, not pulling' % branch
-            print 'exectute the folowing for pushing'
-            print 'git push -u origin %s' % branch
+            print('%s is not on remote, not pulling' % branch)
+            print('exectute the folowing for pushing')
+            print('git push -u origin %s' % branch)
             noremote.add(branch)
 
     to_rebase = [branch for branch in to_rebase if

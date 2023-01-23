@@ -103,7 +103,7 @@ def push():
         log.info(output)
         ret = True
     except Exception as e:
-        print e
+        print(e)
         ret = False
     return ret
 

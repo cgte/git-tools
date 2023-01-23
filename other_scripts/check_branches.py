@@ -22,7 +22,7 @@ def stripper(text):
 
     return [
         line
-        for line in filter(None, map(lambda x: x.strip(), text.strip().split("\n")))
+        for line in [_f for _f in [x.strip() for x in text.strip().split("\n")] if _f]
     ]
 
 
@@ -70,7 +70,7 @@ import datetime
 def get_date(ref):
     out = _shell(f'git show --format="%ad" --date=short --no-patch {ref}')
     try:
-        date = datetime.date(*map(int, out.stdout.split("-")))
+        date = datetime.date(*list(map(int, out.stdout.split("-"))))
     except:
         breakpoint()
     return date
@@ -106,7 +106,7 @@ for rm_remote in branches_to_remove:
             commands.append(f"git branch -D {rm_remote}")
 
 
-print("\n".join(commands))
+print(("\n".join(commands)))
 
 
 def remote_unmerged(remote="origin", ref="main"):

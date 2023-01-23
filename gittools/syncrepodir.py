@@ -9,7 +9,7 @@ I have multiples repos i may want to sync.
 
 from subprocess import CalledProcessError
 import os
-from gitcmd import has_diff, backandforth, pull, push, fetch, origin_diff
+from .gitcmd import has_diff, backandforth, pull, push, fetch, origin_diff
 import sys
 
 def main():
@@ -33,14 +33,14 @@ def main():
         try:
             upgradable = not has_diff(repo)
         except Exception as exc:
-            print "Error happened in repo %s :" % repo
-            print exc
+            print("Error happened in repo %s :" % repo)
+            print(exc)
             continue
         else:
             if upgradable:
                 upgradable_repos.append(repo)
             else:
-                print '%s is not updatable (maybe local diff) skipping' % repo
+                print('%s is not updatable (maybe local diff) skipping' % repo)
 
     def is_gitsvn(repo=None):
         here =  os.getcwd()
@@ -55,34 +55,34 @@ def main():
 
     from pprint import pprint
     pprint(git_repos)
-    print '*' * 80
-    print 'Upgradable repo'
+    print('*' * 80)
+    print('Upgradable repo')
     pprint(upgradable_repos)
-    print "repos with diff"
+    print("repos with diff")
     pprint(list(set(git_repos) - set(upgradable_repos)))
 
     here = os.path.abspath(os.getcwd())
 
     for repo in git_repos:
         if is_gitsvn(repo):
-            print repo, 'is a git svn repo not handled yet' # The is an origin, remote issue
+            print(repo, 'is a git svn repo not handled yet') # The is an origin, remote issue
             continue
         os.chdir(repo)
         with backandforth():
-            print repo
+            print(repo)
             fetch()
             if repo not in upgradable_repos:
                 continue
             try:
                 if origin_diff():
-                    print 'pulling master'
+                    print('pulling master')
                     pull('master')
                 if not push():
-                    print '#####################################'
-                    print 'push failed for'
-                    print os.getcwd()
+                    print('#####################################')
+                    print('push failed for')
+                    print(os.getcwd())
             except Exception as e:
-                print e
+                print(e)
                 continue
     os.chdir(here)
 
