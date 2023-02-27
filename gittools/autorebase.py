@@ -8,6 +8,7 @@ Goals:
 
 """
 
+
 import sys, shlex
 from subprocess import CalledProcessError
 from .commands import get_lines
@@ -20,13 +21,23 @@ import logging as log
 
 from .utils import silent, devnull
 
+default_rebase_onto_branch = "main"
+
+
 parser = argparse.ArgumentParser("Automatic rebaser")
 parser.add_argument(
-    "--target-branch", "-t", default="master", help="name of the branch to rebase onto"
+    "--target-branch",
+    "-t",
+    default=f"{default_rebase_onto_branch}",
+    help="name of the branch to rebase onto",
 )
 parser.add_argument(
     "--branch", "-b", default=None, help="specify only one branch to rebase"
 )
+
+
+def current_branch():
+    return get_lines("git rev-parse --abbrev-ref HEAD")[0]
 
 
 def shouldnot_rebase_branch(branch_name):
@@ -43,6 +54,8 @@ def main(params=""):
         if params
         else vars(parser.parse_args())
     )
+    if params["branch"] is None:
+        params["branch"] = current_branch()
     autorebase(**params)
 
 

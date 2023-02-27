@@ -27,6 +27,10 @@ setup(
             "autorebase = gittools.autorebase:main",
             "syncgitdir = gittools.syncrepodir:main",
             "syncfeatures = gittools.syncfeatures:main",
+            "listopen = gittools.listopen:main",
+            "autoclean = gittools.autoclean:main",
+            "listold = gittools.listold:main",
+            "diagnose = gittools.diagnose:main",
         ]
     },
 )
